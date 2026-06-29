@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Producto</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4" style="max-width:650px">
+    <h2 th:text="${producto.id == null} ? 'Nuevo Producto' : 'Editar Producto'"></h2>
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-body p-4">
+            <!-- enctype multipart es OBLIGATORIO para que la imagen se envíe -->
+            <form th:action="@{/admin/productos/guardar}"
+                  th:object="${producto}"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <!-- id e imagen actual viajan ocultos para no perderlos al editar -->
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{imagen}">
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre *</label>
+                    <input type="text" th:field="*{nombre}" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <textarea th:field="*{descripcion}" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Precio (S/.) *</label>
+                        <input type="number" th:field="*{precio}" step="0.01"
+                               min="0" class="form-control" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Stock *</label>
+                        <input type="number" th:field="*{stock}" min="0"
+                               class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Categoría *</label>
+                    <select th:field="*{categoria.id}" class="form-select" required>
+                        <option value="">-- Selecciona --</option>
+                        <option th:each="cat : ${categorias}"
+                                th:value="${cat.id}"
+                                th:text="${cat.nombre}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Imagen del producto</label>
+                    <input type="file" name="archivoImagen"
+                           class="form-control" accept="image/*"
+                           onchange="previsualizarImagen(event)">
+
+                    <!-- Vista previa de imagen ya guardada (modo editar) -->
+                    <img th:if="${producto.imagen != null}"
+                         th:src="@{/uploads/{img}(img=${producto.imagen})}"
+                         id="previewActual"
+                         style="width:120px;margin-top:10px;border-radius:8px;display:block">
+
+                    <!-- Vista previa de la nueva imagen seleccionada (antes de guardar) -->
+                    <img id="previewNueva" style="width:120px;margin-top:10px;
+                         border-radius:8px;display:none">
+                </div>
+
+                <!-- Checkbox para activar/desactivar el producto al editar -->
+                <div class="form-check mb-3" th:if="${producto.id != null}">
+                    <input type="checkbox" th:field="*{activo}"
+                           class="form-check-input" id="activoCheck">
+                    <label class="form-check-label" for="activoCheck">
+                        Producto activo (visible en catálogo)
+                    </label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a href="/admin/productos" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // Muestra una vista previa de la imagen antes de subirla al servidor
+    function previsualizarImagen(event) {
+        const archivo = event.target.files[0];
+        if (!archivo) return;
+
+        const lector = new FileReader();
+        lector.onload = function(e) {
+            const previewNueva = document.getElementById('previewNueva');
+            const previewActual = document.getElementById('previewActual');
+
+            previewNueva.src = e.target.result;
+            previewNueva.style.display = 'block';
+            if (previewActual) previewActual.style.display = 'none';
+        };
+        lector.readAsDataURL(archivo);
+    }
+</script>
+</body>
+</html>

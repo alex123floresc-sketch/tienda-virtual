@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Facturas</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <h2 class="mb-3">Facturas Emitidas</h2>
+
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+
+    <!-- Buscador por número de factura -->
+    <form method="get" action="/admin/facturas" class="mb-3">
+        <div class="input-group" style="max-width:350px">
+            <input type="text" name="buscar" class="form-control"
+                   placeholder="Buscar por N° de factura..." th:value="${busqueda}">
+            <button class="btn btn-outline-primary" type="submit">Buscar</button>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>N° Factura</th>
+            <th>Pedido</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Subtotal</th>
+            <th>IGV</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="f : ${facturas}">
+            <td><strong th:text="${f.numero}"></strong></td>
+            <td th:text="'#' + ${f.pedido.id}"></td>
+            <td th:text="${f.pedido.usuario.nombre} + ' ' + ${f.pedido.usuario.apellido}"></td>
+            <td th:text="${#temporals.format(f.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="'S/. ' + ${#numbers.formatDecimal(f.subtotal,1,2)}"></td>
+            <td th:text="'S/. ' + ${#numbers.formatDecimal(f.igv,1,2)}"></td>
+            <td><strong th:text="'S/. ' + ${#numbers.formatDecimal(f.total,1,2)}"></strong></td>
+            <td>
+                    <span class="badge"
+                          th:classappend="${f.estado == 'EMITIDA'} ? 'bg-success' : 'bg-secondary'"
+                          th:text="${f.estado}">
+                    </span>
+            </td>
+            <td>
+                <a th:href="@{/factura/{id}(id=${f.id})}"
+                   class="btn btn-outline-primary btn-sm">Ver</a>
+                <a th:href="@{/factura/descargar/{id}(id=${f.id})}"
+                   class="btn btn-outline-success btn-sm" target="_blank">PDF</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(facturas)}">
+            <td colspan="9" class="text-center text-muted py-4">
+                No hay facturas emitidas
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Totales acumulados del periodo -->
+    <div class="card mt-3" style="max-width:300px">
+        <div class="card-body">
+            <h6 class="card-title text-muted">Total facturado</h6>
+            <p class="fs-4 mb-0" th:text="'S/. ' + ${#numbers.formatDecimal(totalFacturado,1,2)}"></p>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

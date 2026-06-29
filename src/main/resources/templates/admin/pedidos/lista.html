@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Pedidos</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <h2 class="mb-3">Gestión de Pedidos</h2>
+
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+
+    <!-- Filtro por estado -->
+    <form method="get" action="/admin/pedidos" class="mb-3">
+        <div class="input-group" style="max-width:300px">
+            <select name="estado" class="form-select" onchange="this.form.submit()">
+                <option value="">Todos los estados</option>
+                <option value="PENDIENTE" th:selected="${estadoFiltro == 'PENDIENTE'}">Pendiente</option>
+                <option value="PAGADO" th:selected="${estadoFiltro == 'PAGADO'}">Pagado</option>
+                <option value="ENVIADO" th:selected="${estadoFiltro == 'ENVIADO'}">Enviado</option>
+                <option value="ENTREGADO" th:selected="${estadoFiltro == 'ENTREGADO'}">Entregado</option>
+            </select>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>N° Pedido</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Tipo de pago</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${pedidos}">
+            <td th:text="'#' + ${p.id}"></td>
+            <td th:text="${p.usuario.nombre} + ' ' + ${p.usuario.apellido}"></td>
+            <td th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${p.tipoPago}"></td>
+            <td th:text="'S/. ' + ${#numbers.formatDecimal(p.total,1,2)}"></td>
+            <td>
+                    <span class="badge"
+                          th:classappend="${p.estado == 'PENDIENTE'} ? 'bg-warning text-dark' :
+                                          (${p.estado == 'PAGADO'} ? 'bg-info' :
+                                          (${p.estado == 'ENVIADO'} ? 'bg-primary' : 'bg-success'))"
+                          th:text="${p.estado}">
+                    </span>
+            </td>
+            <td>
+                <a th:href="@{/admin/pedidos/{id}(id=${p.id})}"
+                   class="btn btn-outline-primary btn-sm">Ver detalle</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(pedidos)}">
+            <td colspan="7" class="text-center text-muted py-4">
+                No hay pedidos registrados
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

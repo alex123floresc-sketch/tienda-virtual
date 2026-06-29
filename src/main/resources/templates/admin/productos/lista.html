@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin - Productos</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Gestión de Productos</h2>
+        <div>
+            <a href="/admin/categorias" class="btn btn-outline-secondary">Categorías</a>
+            <a href="/admin/productos/nuevo" class="btn btn-primary">+ Nuevo Producto</a>
+        </div>
+    </div>
+
+    <div th:if="${exito}" class="alert alert-success" th:text="${exito}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Buscador interno del panel admin -->
+    <form method="get" action="/admin/productos" class="mb-3">
+        <div class="input-group" style="max-width:400px">
+            <input type="text" name="buscar" class="form-control"
+                   placeholder="Buscar por nombre..." th:value="${busqueda}">
+            <button class="btn btn-outline-primary" type="submit">Buscar</button>
+        </div>
+    </form>
+
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${productos}">
+            <td>
+                <img th:src="@{/uploads/{img}(img=${p.imagen})}"
+                     th:if="${p.imagen != null}"
+                     style="width:50px;height:50px;object-fit:cover;border-radius:6px">
+                <span th:unless="${p.imagen != null}" class="text-muted small">
+                        Sin imagen
+                    </span>
+            </td>
+            <td th:text="${p.nombre}"></td>
+            <td th:text="${p.categoria.nombre}"></td>
+            <td th:text="'S/. ' + ${#numbers.formatDecimal(p.precio,1,2)}"></td>
+            <td>
+                    <span th:text="${p.stock}"
+                          th:classappend="${p.stock < 5} ? 'text-danger fw-bold' : ''"></span>
+            </td>
+            <td>
+                    <span class="badge"
+                          th:classappend="${p.activo} ? 'bg-success' : 'bg-secondary'"
+                          th:text="${p.activo} ? 'Activo' : 'Inactivo'">
+                    </span>
+            </td>
+            <td>
+                <a th:href="@{/admin/productos/editar/{id}(id=${p.id})}"
+                   class="btn btn-warning btn-sm">Editar</a>
+                <a th:href="@{/admin/productos/eliminar/{id}(id=${p.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('¿Eliminar este producto?')">Eliminar</a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(productos)}">
+            <td colspan="7" class="text-center text-muted py-4">
+                No hay productos registrados
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

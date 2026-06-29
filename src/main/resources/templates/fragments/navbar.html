@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">🛒 Tienda Virtual</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Catálogo</a>
+                </li>
+                <!-- Solo visible si el usuario tiene rol ADMIN -->
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')"
+                    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                    <a class="nav-link" href="/admin/productos">Administrar</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                <!-- Carrito siempre visible -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/carrito">
+                        🛒 Carrito
+                    </a>
+                </li>
+
+                <!-- Si NO hay sesión iniciada -->
+                <li class="nav-item" sec:authorize="!isAuthenticated()"
+                    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                    <a class="nav-link" href="/login">Iniciar sesión</a>
+                </li>
+
+                <!-- Si SÍ hay sesión iniciada -->
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()"
+                    xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Mi cuenta
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/mis-pedidos">Mis pedidos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button type="submit" class="dropdown-item">Cerrar sesión</button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

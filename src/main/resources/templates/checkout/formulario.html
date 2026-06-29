@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Finalizar compra</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <h2 class="mb-3">Finalizar compra</h2>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="row">
+        <!-- Formulario de datos y pago -->
+        <div class="col-md-7">
+            <form th:action="@{/checkout/confirmar}" method="post">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header">Datos de entrega</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" class="form-control"
+                                   th:value="${usuario.nombre} + ' ' + ${usuario.apellido}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dirección de entrega *</label>
+                            <input type="text" name="direccion" class="form-control"
+                                   th:value="${usuario.direccion}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono de contacto *</label>
+                            <input type="tel" name="telefono" class="form-control"
+                                   th:value="${usuario.telefono}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header">Tipo de pago</div>
+                    <div class="card-body">
+                        <div class="form-check mb-2">
+                            <input type="radio" name="tipoPago" value="EFECTIVO"
+                                   class="form-check-input" id="pagoEfectivo" checked>
+                            <label class="form-check-label" for="pagoEfectivo">
+                                💵 Efectivo (contra entrega)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="radio" name="tipoPago" value="TARJETA"
+                                   class="form-check-input" id="pagoTarjeta"
+                                   onclick="mostrarCamposTarjeta(true)">
+                            <label class="form-check-label" for="pagoTarjeta">
+                                💳 Tarjeta de crédito/débito
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="radio" name="tipoPago" value="TRANSFERENCIA"
+                                   class="form-check-input" id="pagoTransferencia"
+                                   onclick="mostrarCamposTarjeta(false)">
+                            <label class="form-check-label" for="pagoTransferencia">
+                                🏦 Transferencia bancaria
+                            </label>
+                        </div>
+
+                        <!-- Campos de tarjeta, ocultos por defecto -->
+                        <div id="camposTarjeta" style="display:none" class="border-top pt-3">
+                            <div class="mb-2">
+                                <label class="form-label small">Número de tarjeta</label>
+                                <input type="text" name="numeroTarjeta" class="form-control"
+                                       placeholder="0000 0000 0000 0000" maxlength="19">
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label class="form-label small">Vencimiento</label>
+                                    <input type="text" name="vencimientoTarjeta"
+                                           class="form-control" placeholder="MM/AA">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label small">CVV</label>
+                                    <input type="text" name="cvvTarjeta"
+                                           class="form-control" maxlength="3">
+                                </div>
+                            </div>
+                            <p class="small text-muted mt-2">
+                                ⚠️ Esto es una simulación educativa, no proceses tarjetas reales sin cumplir PCI-DSS.
+                            </p>
+                        </div>
+
+                        <!-- Datos bancarios para transferencia -->
+                        <div id="datosTransferencia" style="display:none" class="border-top pt-3">
+                            <p class="small mb-1">Realiza la transferencia a:</p>
+                            <p class="small mb-0"><strong>Banco:</strong> BCP</p>
+                            <p class="small mb-0"><strong>Cuenta:</strong> 191-1234567-0-12</p>
+                            <p class="small"><strong>CCI:</strong> 002-191-001234567012-34</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    Confirmar pedido
+                </button>
+            </form>
+        </div>
+
+        <!-- Resumen del pedido -->
+        <!-- Resumen del pedido -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header">Resumen del pedido</div>
+                <div class="card-body">
+                    <div th:each="item : ${items}" class="d-flex justify-content-between mb-2 small">
+                        <span th:text="${item.cantidad} + 'x ' + ${item.nombre}"></span>
+                        <span th:text="'S/. ' + ${#numbers.formatDecimal(item.subtotal,1,2)}"></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span th:text="'S/. ' + ${#numbers.formatDecimal(subtotal,1,2)}"></span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>IGV (18%)</span>
+                        <span th:text="'S/. ' + ${#numbers.formatDecimal(igv,1,2)}"></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fs-5 fw-bold">
+                        <span>Total</span>
+                        <span th:text="'S/. ' + ${#numbers.formatDecimal(total,1,2)}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // Muestra/oculta los campos según el tipo de pago elegido
+    function mostrarCamposTarjeta(esTarjeta) {
+        document.getElementById('camposTarjeta').style.display = esTarjeta ? 'block' : 'none';
+        document.getElementById('datosTransferencia').style.display = esTarjeta ? 'none' : 'block';
+    }
+    document.getElementById('pagoEfectivo').addEventListener('change', function() {
+        document.getElementById('camposTarjeta').style.display = 'none';
+        document.getElementById('datosTransferencia').style.display = 'none';
+    });
+</script>
+</body>
+</html>

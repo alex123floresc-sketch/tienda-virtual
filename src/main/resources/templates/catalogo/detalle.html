@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${producto.nombre}">Producto</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <a href="/" class="btn btn-link ps-0">&laquo; Volver al catálogo</a>
+
+    <div class="row mt-2">
+        <!-- Imagen grande del producto -->
+        <div class="col-md-5">
+            <img th:src="@{/uploads/{img}(img=${producto.imagen})}"
+                 th:if="${producto.imagen != null}"
+                 class="img-fluid rounded shadow-sm" alt="Imagen del producto">
+            <img src="/img/sin-imagen.png"
+                 th:unless="${producto.imagen != null}"
+                 class="img-fluid rounded shadow-sm" alt="Sin imagen disponible">
+        </div>
+
+        <!-- Información del producto -->
+        <div class="col-md-7">
+            <span class="badge bg-secondary mb-2" th:text="${producto.categoria.nombre}"></span>
+            <h2 th:text="${producto.nombre}"></h2>
+            <p class="text-muted" th:text="${producto.descripcion}"></p>
+
+            <h3 class="text-primary fw-bold"
+                th:text="'S/. ' + ${#numbers.formatDecimal(producto.precio, 1, 2)}"></h3>
+
+            <p>
+                <span th:if="${producto.stock > 0}" class="text-success">
+                    ✓ Disponible (<span th:text="${producto.stock}"></span> unidades)
+                </span>
+                <span th:if="${producto.stock == 0}" class="text-danger">
+                    ✕ Sin stock disponible
+                </span>
+            </p>
+
+            <!-- Formulario para agregar con cantidad seleccionable -->
+            <form th:action="@{/carrito/agregar}" method="post" class="d-flex gap-2 mt-3"
+                  th:if="${producto.stock > 0}">
+                <input type="hidden" name="productoId" th:value="${producto.id}">
+                <input type="number" name="cantidad" value="1" min="1"
+                       th:max="${producto.stock}" class="form-control" style="max-width:100px">
+                <button type="submit" class="btn btn-primary">Agregar al carrito 🛒</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

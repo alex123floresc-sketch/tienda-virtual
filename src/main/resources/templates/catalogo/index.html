@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tienda Virtual - Catálogo</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .card-producto { transition: transform 0.2s; }
+        .card-producto:hover { transform: translateY(-4px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .precio { font-size: 1.3rem; font-weight: bold; color: #0d6efd; }
+        .img-producto { height: 200px; object-fit: cover; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+
+    <!-- Buscador -->
+    <form method="get" action="/" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="buscar" class="form-control form-control-lg"
+                   placeholder="Buscar productos..." th:value="${busqueda}">
+            <button class="btn btn-primary" type="submit">Buscar</button>
+            <a href="/" class="btn btn-outline-secondary">Limpiar</a>
+        </div>
+    </form>
+
+    <div th:if="${mensajeCarrito}" class="alert alert-success alert-dismissible fade show">
+        <span th:text="${mensajeCarrito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <!-- Filtro categorías -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Categorías</div>
+                <div class="list-group list-group-flush">
+                    <a href="/" class="list-group-item list-group-item-action"
+                       th:classappend="${categoriaSeleccionada == null} ? 'active' : ''">
+                        Todas las categorías
+                    </a>
+                    <a th:each="cat : ${categorias}"
+                       th:href="@{/(categoria=${cat.id})}"
+                       th:text="${cat.nombre}"
+                       th:classappend="${categoriaSeleccionada == cat.id} ? 'active' : ''"
+                       class="list-group-item list-group-item-action">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de productos -->
+        <div class="col-md-9">
+            <div th:if="${#lists.isEmpty(productos)}" class="alert alert-info">
+                No se encontraron productos.
+            </div>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="col" th:each="p : ${productos}">
+                    <div class="card h-100 card-producto">
+                        <img th:src="@{/uploads/{img}(img=${p.imagen})}"
+                             th:if="${p.imagen != null}"
+                             class="card-img-top img-producto" alt="Imagen del producto">
+                        <img src="/img/sin-imagen.png"
+                             th:unless="${p.imagen != null}"
+                             class="card-img-top img-producto" alt="Sin imagen disponible">
+                        <div class="card-body">
+                            <span class="badge bg-secondary mb-1" th:text="${p.categoria.nombre}"></span>
+                            <h5 class="card-title" th:text="${p.nombre}"></h5>
+                            <p class="card-text text-muted small"
+                               th:text="${#strings.abbreviate(p.descripcion, 80)}"></p>
+                            <p class="precio" th:text="'S/. ' + ${#numbers.formatDecimal(p.precio, 1, 2)}"></p>
+                            <p class="small text-muted">
+                                Stock:
+                                <span th:text="${p.stock}"
+                                      th:classappend="${p.stock == 0} ? 'text-danger fw-bold' : ''"></span>
+                            </p>
+                        </div>
+                        <div class="card-footer d-flex gap-2">
+                            <a th:href="@{/producto/{id}(id=${p.id})}"
+                               class="btn btn-outline-primary btn-sm flex-fill">Ver detalle</a>
+                            <form th:action="@{/carrito/agregar}" method="post" class="flex-fill">
+                                <input type="hidden" name="productoId" th:value="${p.id}">
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="btn btn-primary btn-sm w-100"
+                                        th:disabled="${p.stock == 0}">
+                                    <span th:text="${p.stock == 0} ? 'Sin stock' : 'Agregar 🛒'"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

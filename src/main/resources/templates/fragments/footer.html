@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="footer" class="bg-dark text-light mt-5 py-4">
+    <div class="container text-center">
+        <p class="mb-1">🛒 Tienda Virtual S.A.</p>
+        <p class="small text-secondary mb-0">
+            RUC: 20123456789 · Todos los derechos reservados
+            &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span>
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>
